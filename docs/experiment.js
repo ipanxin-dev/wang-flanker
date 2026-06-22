@@ -1,6 +1,6 @@
 const CONFIG = {
   sheetId: "1pZgmLK_tXgLut8kqiuWo1tY4NLQXOqsO0IWH04JmUHI",
-  webhookUrl: "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE",
+  webhookUrl: "https://script.google.com/macros/s/AKfycbzbtujI2MuU3Zi2Vd8dyYLgPR1Nn6ieBaEHsE6kHRNCEtInXW_HVV6Ne-eLP0Dz69eTkw/exec",
   taskName: "flanker_arrows_cn",
   taskVersion: "2026-06-22",
   practiceTrials: 10,
@@ -252,6 +252,20 @@ function dataDownloadUrl() {
   return URL.createObjectURL(blob);
 }
 
+function formResponse(data) {
+  if (data && data.response) {
+    return data.response;
+  }
+  if (data && data.responses) {
+    try {
+      return typeof data.responses === "string" ? JSON.parse(data.responses) : data.responses;
+    } catch {
+      return {};
+    }
+  }
+  return {};
+}
+
 function instruction(title, body, button = "继续") {
   return {
     type: jsPsychHtmlButtonResponse,
@@ -390,11 +404,11 @@ function buildTimeline() {
        </label>`
     ),
     button_label: "开始",
-    record_data: false,
     on_finish: (data) => {
+      const response = formResponse(data);
       participant = {
-        name: data.response.name.trim(),
-        studentId: data.response.student_id.trim(),
+        name: String(response.name || "").trim(),
+        studentId: String(response.student_id || "").trim(),
         sessionId: jsPsych.randomization.randomID(10),
       };
       startedAt = nowIso();
